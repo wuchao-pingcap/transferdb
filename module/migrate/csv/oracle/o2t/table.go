@@ -94,6 +94,8 @@ func (t *Rows) ReadData() error {
 		zap.String("sql", querySQL),
 		zap.String("cost", endTime.Sub(startTime).String()))
 
+	zap.L().Info("----ReadData() finish")
+
 	// 通道关闭
 	close(t.ReadChannel)
 
@@ -103,7 +105,7 @@ func (t *Rows) ReadData() error {
 func (t *Rows) ProcessData() error {
 	zap.L().Info("----ProcessData()")
 	for dataC := range t.ReadChannel {
-		zap.L().Info(fmt.Sprintf("----ProcessData() dataC:%v", dataC))
+		zap.L().Info(fmt.Sprintf("----ProcessData() dataC %v", dataC))
 		for _, dMap := range dataC {
 			// 按字段名顺序遍历获取对应值
 			var (
@@ -118,11 +120,12 @@ func (t *Rows) ProcessData() error {
 				return fmt.Errorf("source schema table column counts vs data counts isn't match")
 			} else {
 				// csv 文件行数据输入
+				zap.L().Info(fmt.Sprintf("----ProcessData() t.WriteChannel <-  %s", common.StringsBuilder(exstrings.Join(rowsTMP, t.Cfg.CSVConfig.Separator), t.Cfg.CSVConfig.Terminator)))
 				t.WriteChannel <- common.StringsBuilder(exstrings.Join(rowsTMP, t.Cfg.CSVConfig.Separator), t.Cfg.CSVConfig.Terminator)
-				zap.L().Info("----ProcessData() put into WriteChannel:" + common.StringsBuilder(exstrings.Join(rowsTMP, t.Cfg.CSVConfig.Separator), t.Cfg.CSVConfig.Terminator))
 			}
 		}
 	}
+	zap.L().Info("----ProcessData() finish")
 
 	// 通道关闭
 	close(t.WriteChannel)
@@ -163,7 +166,6 @@ func (t *Rows) ApplyData() error {
 	zap.L().Info(fmt.Sprintf("----ApplyData() 2 len(t.WriteChannel):[%d]", len(t.WriteChannel)))
 
 	for dataC := range t.WriteChannel {
-		zap.L().Info("----ApplyData() 2", zap.String("dataC:", dataC))
 		if _, err = writer.WriteString(dataC); err != nil {
 			return fmt.Errorf("failed to write data row to csv %w", err)
 		}

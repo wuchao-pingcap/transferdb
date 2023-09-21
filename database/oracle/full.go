@@ -248,6 +248,9 @@ func (o *Oracle) GetOracleTableRowsDataCSV(querySQL, sourceDBCharset, targetDBCh
 		// MAP 清空
 		rowsMap = make(map[string]string)
 
+		zap.L().Info(fmt.Sprintf("GetOracleTableRowsDataCSV() len(rowsTMP): %d", len(rowsTMP)))
+		zap.L().Info(fmt.Sprintf("GetOracleTableRowsDataCSV() cfg.AppConfig.InsertBatchSize: %d", cfg.AppConfig.InsertBatchSize))
+
 		// batch 批次
 		if len(rowsTMP) == cfg.AppConfig.InsertBatchSize {
 			zap.L().Info("GetOracleTableRowsDataCSV() batch 批次 写入dataChan:")
