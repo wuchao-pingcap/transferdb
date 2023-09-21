@@ -118,6 +118,7 @@ func (t *Rows) ProcessData() error {
 			} else {
 				// csv 文件行数据输入
 				t.WriteChannel <- common.StringsBuilder(exstrings.Join(rowsTMP, t.Cfg.CSVConfig.Separator), t.Cfg.CSVConfig.Terminator)
+				zap.L().Info("----ProcessData() put into WriteChannel:" + common.StringsBuilder(exstrings.Join(rowsTMP, t.Cfg.CSVConfig.Separator), t.Cfg.CSVConfig.Terminator))
 			}
 		}
 	}
@@ -158,9 +159,10 @@ func (t *Rows) ApplyData() error {
 		}
 	}
 	zap.L().Info("----ApplyData()2")
+	zap.L().Info(fmt.Sprintf("----ApplyData() 2 len(t.WriteChannel):[%d]", len(t.WriteChannel)))
 
 	for dataC := range t.WriteChannel {
-		zap.L().Info("----ApplyData()2", zap.String("dataC:", dataC))
+		zap.L().Info("----ApplyData() 2", zap.String("dataC:", dataC))
 		if _, err = writer.WriteString(dataC); err != nil {
 			return fmt.Errorf("failed to write data row to csv %w", err)
 		}
