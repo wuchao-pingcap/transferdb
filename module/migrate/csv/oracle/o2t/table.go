@@ -112,10 +112,14 @@ func (t *Rows) ProcessData() error {
 				rowsTMP []string
 			)
 			for _, column := range t.ColumnNameS {
+				zap.L().Info(fmt.Sprintf("----ProcessData() column [%s]", column))
 				if val, ok := dMap[column]; ok {
 					rowsTMP = append(rowsTMP, val)
+					zap.L().Info(fmt.Sprintf("----ProcessData() append [%s]", val))
 				}
 			}
+			zap.L().Info(fmt.Sprintf("----ProcessData() len(rowsTMP)  [%d]", len(rowsTMP)))
+			zap.L().Info(fmt.Sprintf("----ProcessData() len(t.ColumnNameS)  [%d]", len(t.ColumnNameS)))
 			if len(rowsTMP) != len(t.ColumnNameS) {
 				return fmt.Errorf("source schema table column counts vs data counts isn't match")
 			} else {
