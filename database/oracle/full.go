@@ -18,9 +18,11 @@ package oracle
 import (
 	"context"
 	"fmt"
+
 	"github.com/shopspring/decimal"
 	"github.com/wentaojin/transferdb/common"
 	"github.com/wentaojin/transferdb/config"
+	"go.uber.org/zap"
 )
 
 func (o *Oracle) GetOracleCurrentSnapshotSCN() (uint64, error) {
@@ -129,6 +131,7 @@ func (o *Oracle) GetOracleTableRowsDataCSV(querySQL, sourceDBCharset, targetDBCh
 	var rowsTMP []map[string]string
 	rowsMap := make(map[string]string)
 
+	zap.L().Info("GetOracleTableRowsDataCSV() querySQL:" + querySQL)
 	rows, err := o.OracleDB.QueryContext(o.Ctx, querySQL)
 	if err != nil {
 		return err
@@ -247,6 +250,7 @@ func (o *Oracle) GetOracleTableRowsDataCSV(querySQL, sourceDBCharset, targetDBCh
 
 		// batch 批次
 		if len(rowsTMP) == cfg.AppConfig.InsertBatchSize {
+			zap.L().Info("GetOracleTableRowsDataCSV() batch 批次 写入dataChan:")
 
 			dataChan <- rowsTMP
 
@@ -261,7 +265,7 @@ func (o *Oracle) GetOracleTableRowsDataCSV(querySQL, sourceDBCharset, targetDBCh
 
 	// 非 batch 批次
 	if len(rowsTMP) > 0 {
-
+		zap.L().Info("GetOracleTableRowsDataCSV() 非batch 批次 写入dataChan:")
 		dataChan <- rowsTMP
 	}
 

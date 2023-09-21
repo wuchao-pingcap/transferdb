@@ -103,6 +103,7 @@ func (t *Rows) ReadData() error {
 func (t *Rows) ProcessData() error {
 	zap.L().Info("----ProcessData()")
 	for dataC := range t.ReadChannel {
+		zap.L().Info(fmt.Sprintf("----ProcessData() dataC:%v", dataC))
 		for _, dMap := range dataC {
 			// 按字段名顺序遍历获取对应值
 			var (
