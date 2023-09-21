@@ -140,6 +140,8 @@ func (t *Rows) ApplyData() error {
 		return err
 	}
 
+	zap.L().Info("----ApplyData()1",
+		zap.String("t.SyncMeta.CSVFile:", t.SyncMeta.CSVFile))
 	fileW, err := os.OpenFile(t.SyncMeta.CSVFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
@@ -155,12 +157,16 @@ func (t *Rows) ApplyData() error {
 			return fmt.Errorf("failed to write headers: %v", err)
 		}
 	}
+	zap.L().Info("----ApplyData()2")
 
 	for dataC := range t.WriteChannel {
+		zap.L().Info("----ApplyData()2", zap.String("dataC:", dataC))
 		if _, err = writer.WriteString(dataC); err != nil {
 			return fmt.Errorf("failed to write data row to csv %w", err)
 		}
 	}
+
+	zap.L().Info("----ApplyData()3")
 
 	endTime := time.Now()
 	zap.L().Info("target schema table chunk data applier finished",
