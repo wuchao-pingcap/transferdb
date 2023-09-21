@@ -19,17 +19,18 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/thinkeridea/go-extend/exstrings"
 	"github.com/wentaojin/transferdb/common"
 	"github.com/wentaojin/transferdb/config"
 	"github.com/wentaojin/transferdb/database/meta"
 	"github.com/wentaojin/transferdb/database/oracle"
 	"go.uber.org/zap"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type Rows struct {
@@ -64,6 +65,7 @@ func NewRows(ctx context.Context, syncMeta meta.FullSyncMeta,
 }
 
 func (t *Rows) ReadData() error {
+	zap.L().Info("----ReadData()")
 	startTime := time.Now()
 	var querySQL string
 	switch {
@@ -99,7 +101,7 @@ func (t *Rows) ReadData() error {
 }
 
 func (t *Rows) ProcessData() error {
-
+	zap.L().Info("----ProcessData()")
 	for dataC := range t.ReadChannel {
 		for _, dMap := range dataC {
 			// 按字段名顺序遍历获取对应值
@@ -127,6 +129,7 @@ func (t *Rows) ProcessData() error {
 }
 
 func (t *Rows) ApplyData() error {
+	zap.L().Info("----ApplyData()")
 	startTime := time.Now()
 	// 文件目录判断
 	if err := common.PathExist(
