@@ -112,8 +112,10 @@ func (t *Rows) ProcessData() error {
 				rowsTMP []string
 			)
 			for _, column := range t.ColumnNameS {
+				key := strings.ReplaceAll(column, "`", "")
 				zap.L().Info(fmt.Sprintf("----ProcessData() column [%s]", column))
-				if val, ok := dMap[column]; ok {
+				zap.L().Info(fmt.Sprintf("----ProcessData() key [%s]", key))
+				if val, ok := dMap[key]; ok {
 					rowsTMP = append(rowsTMP, val)
 					zap.L().Info(fmt.Sprintf("----ProcessData() append [%s]", val))
 				}
