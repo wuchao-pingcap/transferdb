@@ -19,15 +19,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/wentaojin/transferdb/common"
 	"github.com/wentaojin/transferdb/database/meta"
 	"github.com/wentaojin/transferdb/database/mysql"
 	"github.com/wentaojin/transferdb/database/oracle"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type Rows struct {
@@ -89,17 +90,17 @@ func (t *Rows) ReadData() error {
 
 	switch {
 	case strings.EqualFold(t.SyncMeta.ConsistentRead, "YES") && strings.EqualFold(t.SyncMeta.SQLHint, ""):
-		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.ColumnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
-		execQuerySQL = common.StringsBuilder(`SELECT `, columnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
+		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.ColumnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
+		execQuerySQL = common.StringsBuilder(`SELECT `, columnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
 	case strings.EqualFold(t.SyncMeta.ConsistentRead, "YES") && !strings.EqualFold(t.SyncMeta.SQLHint, ""):
-		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, t.SyncMeta.ColumnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
-		execQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, columnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
+		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, t.SyncMeta.ColumnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
+		execQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, columnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" AS OF SCN `, strconv.FormatUint(t.SyncMeta.GlobalScnS, 10), ` WHERE `, t.SyncMeta.ChunkDetailS)
 	case strings.EqualFold(t.SyncMeta.ConsistentRead, "NO") && !strings.EqualFold(t.SyncMeta.SQLHint, ""):
-		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, t.SyncMeta.ColumnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` WHERE `, t.SyncMeta.ChunkDetailS)
-		execQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, columnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` WHERE `, t.SyncMeta.ChunkDetailS)
+		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, t.SyncMeta.ColumnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" WHERE `, t.SyncMeta.ChunkDetailS)
+		execQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.SQLHint, ` `, columnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" WHERE `, t.SyncMeta.ChunkDetailS)
 	default:
-		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.ColumnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` WHERE `, t.SyncMeta.ChunkDetailS)
-		execQuerySQL = common.StringsBuilder(`SELECT `, columnDetailS, ` FROM `, t.SyncMeta.SchemaNameS, `.`, t.SyncMeta.TableNameS, ` WHERE `, t.SyncMeta.ChunkDetailS)
+		originQuerySQL = common.StringsBuilder(`SELECT `, t.SyncMeta.ColumnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" WHERE `, t.SyncMeta.ChunkDetailS)
+		execQuerySQL = common.StringsBuilder(`SELECT `, columnDetailS, ` FROM "`, t.SyncMeta.SchemaNameS, `"."`, t.SyncMeta.TableNameS, `" WHERE `, t.SyncMeta.ChunkDetailS)
 	}
 
 	zap.L().Info("source schema table chunk rows extractor starting",
